@@ -21,8 +21,8 @@ Example:
 import requests
 
 payload = {
-    'url': 'https://amp.pharm.mssm.edu/geneshot/index.html?searchin=Wound healing&searchnot=&rif=autorif',
-    'apikey': 'secretkey'    
+        'url': 'https://amp.pharm.mssm.edu/geneshot/index.html?searchin=Wound healing&searchnot=&rif=autorif',
+        'apikey': 'secretkey'    
     }
 
 response = requests.post('https://maayanlab.cloud/turl/api', json=payload)
@@ -80,11 +80,13 @@ The server expects the following environmental variables:
 Run prebuilt docker container on local host. Modify variables as needed.
 
 ```
-sudo docker run -p 3000:3000 -d --name="turl" maayanlab/shorturl \ 
+sudo docker run \ 
     -e AWS_ID='XXXXXX' \
     -e AWS_KEY='YYYYYY' \
     -e DOMAIN='https://maayanlab.cloud' \
     -e ENDPOINT='turl' \
     -e API_KEY='secretkey' \
     -p 3000:3000 \
+    -d --name="turl" maayanlab/shorturl 
 ```
+
