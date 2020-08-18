@@ -39,7 +39,7 @@ Go to DynamoDB and create table. Choose a table name, this name will have to be 
 
 ### User
 
-Create a new role for DynamoDB user with programmatic access in IAM. Click Next: Permissions and select `Attach existing policies directly`. Select `Create Policy` and paste:
+Create a new role for DynamoDB user with programmatic access in IAM. Click `Next: Permissions` and select `Attach existing policies directly`. Select `Create Policy` and paste:
 
 ```
 {
@@ -65,7 +65,7 @@ Write down the AWS id and AWS key. They will be needed as environmental variable
 
 ## Deploying the webserver
 
-The webserver is available as a Docker container at maayanlab/shorturl. Depending where is will be accessible adjust the `DOMAIN` and `ENDPOINT` accortingly. In this example the webserver is exposed at `https://maayanlab.cloud/turl`. 
+The webserver is available as a Docker container at maayanlab/shorturl. Depending where is will be accessible adjust the `DOMAIN` and `ENDPOINT` accortingly. In this example the webserver is exposed at `http://localhost:5000/turl`. 
 
 The server expects the following environmental variables:
 `AWS_ID` = AWS user id <br>
