@@ -60,7 +60,6 @@ class RegisterURL(tornado.web.RequestHandler):
 
 class RedirectURL(tornado.web.RequestHandler):
     def get(self, slug):
-        print(slug)
         self.set_header("Access-Control-Allow-Origin", "*")
         urlhash = self.request.path.split("/")[-1]
         url = get_url(urlhash, DYNAMODB)["url"]
