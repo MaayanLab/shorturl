@@ -70,23 +70,24 @@ The webserver is available as a Docker container at maayanlab/shorturl. Dependin
 The server expects the following environmental variables:
 `AWS_ID` = AWS user id <br>
 `AWS_KEY` = AWS user key <br>
-`DOMAIN` = "https://maayanlab.cloud" <br>
+`AWS_REGION` = "us-east-1"
+`DOMAIN` = "http://localhost:5000" <br>
 `ENDPOINT` = "turl" <br>
 `API_KEY` = "apipassword" <br>
 `DYNAMODB_TABLE` = "shorturl" <br>
 
 ## Deploy docker container
 
-Run prebuilt docker container on local host. Modify variables as needed.
+Run prebuilt docker container on localhost. Modify variables as needed.
 
 ```
 sudo docker run \ 
     -e AWS_ID='XXXXXX' \
     -e AWS_KEY='YYYYYY' \
-    -e DOMAIN='https://maayanlab.cloud' \
+    -e DOMAIN='http://localhost:5000' \
     -e ENDPOINT='turl' \
     -e API_KEY='secretkey' \
-    -p 3000:3000 \
+    -p 5000:5000 \
     -d --name="turl" maayanlab/shorturl 
 ```
 

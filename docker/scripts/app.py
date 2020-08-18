@@ -1,195 +1,74 @@
-import datetime
 import tornado.escape
 import tornado.ioloop
 import tornado.web
-import os
-import io
-import string
-import random
 import requests
-import pymysql
 import json
+import os
 import urllib
-import time
-import math
+import boto3
+import hashlib
+from boto3.dynamodb.conditions import Key
 
-root = os.path.dirname(__file__)
+DOMAIN = os.environ['DOMAIN']
+ENDPOINT = os.environ['ENDPOINT']
+API_KEY = os.environ['API_KEY']
+DYNAMODB_TABLE = os.environ['DYNAMODB_TABLE']
 
-dbhost = os.environ['DBHOST']
-dbuser = os.environ['DBUSER']
-dbpasswd = os.environ['DBPASSWD']
-dbname = os.environ['DBNAME']
+AWS_ID = os.environ['AWS_ID']
+AWS_KEY = os.environ['AWS_KEY']
+AWS_REGION = os.environ['AWS_REGION']
 
-endpoint = os.environ['ENDPOINT']
-jobpasswd = os.environ['JOBPASSWD']
+SESSION = boto3.Session(
+    aws_access_key_id = AWS_ID,
+    aws_secret_access_key = AWS_KEY,
+    region_name=AWS_REGION
+)
+DYNAMODB = SESSION.resource('dynamodb')
 
-def getconnection():
-    db = MySQLdb.connect(host=dbhost,  # your host, usually localhost
-                     user=dbuser,      # your username
-                     passwd=dbpasswd,  # your password
-                     db=dbname)        # name of the data base
-    return(db)
+def hashString(url):
+    return(hashlib.sha1(url.encode("UTF-8")).hexdigest()[:8])
 
-def addurl():
-    db = getconnection()
-    cur = db.cursor()
-    query = "INSERT INTO registry (url, short_url) VALUES ('%s', '%s')" % (url, shorturl)
-    cur.execute(query)
-    db.commit()
-    cur.close()
-    db.close()
+def put_url(url, dynamodb):
+    urlhash = hashString(url)
+    table = dynamodb.Table('shorturl')
+    response = table.put_item(
+       Item={
+            'urlhash': urlhash,
+            'url': url
+        }
+    )
+    response['shorturl'] = DOMAIN+"/"+ENDPOINT+"/"+urlhash
+    return response
 
-def lookupurl():
-    db = getconnection()
-    cur = db.cursor()
-    query = "SELECT * FROM jobqueue WHERE url='%s' LIMIT 1" % (url,)
-    cur.execute(query)
-    for res in cur:
+def get_url(urlhash, dynamodb):
+    table = dynamodb.Table(DYNAMODB_TABLE)
+    response = table.query(
+        KeyConditionExpression=Key('urlhash').eq(urlhash)
+    )
+    return response["Items"][0]
 
-    
-    cur.close()
-    db.close()
-
-class RegisterURL():
-    def get(self):
-        return("")
+class RegisterURL(tornado.web.RequestHandler):
     def post(self):
-        return("")
-
-class CreateJobHandler(tornado.web.RequestHandler):
-    def get(self):
         self.set_header("Access-Control-Allow-Origin", "*")
-        username = self.get_argument('username', True)
-        password = self.get_argument('password', True)
-        file1 = self.get_argument('file1', True)
-        file2 = self.get_argument('file2', True)
-        organism = self.get_argument('organism', True)
-        outname = self.get_argument('outname', True)
-        
-        url = charon_url+"/login?username="+username+"&password="+password
-        response = urllib.urlopen(url)
-        data = json.loads(response.read())
-        uuid = data["message"]
-        
-        if data["status"] == "success":
-            url = charon_url+"/files?username="+username+"&password="+password
-            response = urllib.urlopen(url)
-            data = json.loads(response.read())
-            
-            files = data["filenames"]
-            print(file1)
-            print(file2)
-            
-            if file2 == True:
-                if (file1 in files):
-                    datalink = "https://s3.amazonaws.com/"+bucketname+"/"+uuid+"/"+file1
-                    
-                    h2 = hashlib.md5()
-                    h2.update((datalink).encode('utf-8'))
-                    uid = h2.hexdigest()
-                    
-                    db = getConnection()
-                    cur = db.cursor()
-                    query = "INSERT INTO jobqueue (uid, userid, datalink, outname, organism) VALUES ('%s', '%s', '%s', '%s', '%s')" % (uid, uuid, datalink, outname, organism)
-                    
-                    cur.execute(query)
-                    db.commit()
-                    cur.close()
-                    db.close()
-                    response = { 'action': 'create job',
-                         'task': username,
-                         'status': 'success',
-                         'message': uid}
-                    self.write(response)
-                else:
-                    response = { 'action': 'create job',
-                         'task': username,
-                         'status': 'error',
-                         'message': 'file not found'}
-                    self.write(response)
-            else:
-                if (file1 in files) & (file2 in files):
-                    datalink = "https://s3.amazonaws.com/"+bucketname+"/"+uuid+"/"+file1+";"+"https://s3.amazonaws.com/"+bucketname+"/"+uuid+"/"+file2
-                    
-                    h2 = hashlib.md5()
-                    h2.update((datalink).encode('utf-8'))
-                    uid = h2.hexdigest()
-                    
-                    db = getConnection()
-                    cur = db.cursor()
-                    query = "INSERT INTO jobqueue (uid, userid, datalink, outname, organism) VALUES ('%s', '%s', '%s', '%s', '%s')" % (uid, uuid, datalink, outname, organism)
-                    
-                    cur.execute(query)
-                    db.commit()
-                    cur.close()
-                    db.close()
-                    response = { 'action': 'create job',
-                         'task': username,
-                         'status': 'success',
-                         'message': uid}
-                    self.write(response)
-                else:
-                    response = { 'action': 'create job',
-                         'task': username,
-                         'status': 'error',
-                         'message': 'files not found'}
-                    self.write(response)
-
-class GiveJobHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.set_header("Access-Control-Allow-Origin", "*")
-        jpass = self.get_argument('pass', True)
-        response = {}
-        response["id"] = "empty"
-        
-        if jpass == jobpasswd:
-            db = getConnection()
-            cur = db.cursor()
-            query = "SELECT * FROM jobqueue WHERE status='waiting' LIMIT 1"
-            cur.execute(query)
-            
-            for res in cur:
-                response["id"] = res[0]
-                response["uid"] = res[1]
-                response["userid"] = res[2]
-                response["type"] = "sequencing"
-                response["resultbucket"] = bucketname
-                response["datalinks"] = res[3]
-                response["outname"] = res[4]
-                response["organism"] = res[5]
-                query = "UPDATE jobqueue SET status='submitted', submissiondate=now() WHERE id='%s'" % (res[0])
-                cur.execute(query)
-                db.commit()
-        
+        payload = tornado.escape.json_decode(self.request.body)
+        apikey = payload["apikey"]
+        response = {"error": "apikey not valid"}
+        if apikey == API_KEY:
+            url = payload["url"]
+            response = put_url(url, DYNAMODB)
         self.write(response)
 
-class FinishJobHandler(tornado.web.RequestHandler):
-    def get(self):
+class RedirectURL(tornado.web.RequestHandler):
+    def get(self, slug):
+        print(slug)
         self.set_header("Access-Control-Allow-Origin", "*")
-        jpass = self.get_argument('pass', True)
-        uid = self.get_argument('uid', True)
-        
-        response = {}
-        if jpass == jobpasswd:
-            db = getConnection()
-            cur = db.cursor()
-            query = "UPDATE jobqueue SET status='completed', finishdate=now() WHERE uid='%s'" % (uid)
-            cur.execute(query)
-            db.commit()
-            
-            response["id"] = uid
-            response["status"] = "completed"
-        else:
-            response["id"] = uid
-            response["status"] = "failed"
-        
-        self.write(response)
+        urlhash = self.request.path.split("/")[-1]
+        url = get_url(urlhash, DYNAMODB)["url"]
+        self.redirect(url)
 
 application = tornado.web.Application([
-    (r"/cloudalignment/givejob", GiveJobHandler),
-    (r"/cloudalignment/finishjob", FinishJobHandler),
-    (r"/cloudalignment/createjob", CreateJobHandler)
-    (r"/cloudalignment/(.*)", tornado.web.StaticFileHandler, dict(path=root))
+    (r"/"+ENDPOINT+"/api/register", RegisterURL),
+    (r"/"+ENDPOINT+"/(.*)", RedirectURL)
 ])
 
 if __name__ == "__main__":

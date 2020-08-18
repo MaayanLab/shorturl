@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python scripts/app.py
+python3 scripts/app.py
