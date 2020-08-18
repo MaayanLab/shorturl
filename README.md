@@ -11,3 +11,55 @@ https://maayanlab.cloud/turl/2f59e093
 Directs to:
 https://maayanlab.cloud/Enrichr/enrich?dataset=7a8043c6bbb70d2f3bc871687047cdc8
 ```
+
+## Registering new shortened URLs
+
+To shorten a new URL the user needs to be in possession of an API key. This key is part of the POST request.
+
+Example:
+``` python
+import requests
+
+payload = {
+    'url': 'https://amp.pharm.mssm.edu/geneshot/index.html?searchin=Wound healing&searchnot=&rif=autorif',
+    'apikey': 'secretkey'    
+    }
+
+response = requests.post('https://maayanlab.cloud/turl/api', json=payload)
+print("Status code: ", response.status_code)
+print("Printing Entire Post Request")
+print(response.json())
+```
+
+## Configuring AWS
+
+### Create Table in DynamoDB
+
+Go to DynamoDB and create table. Choose a table name, this name will have to be specified as an environmental variable `DYNAMODB_TABLE` when the webserver is deployed. Set the primary key to `url`. That's it.
+
+### User
+
+Create a new role for DynamoDB user with programmatic access in IAM. Click Next: Permissions and select `Attach existing policies directly`. Select `Create Policy` and paste:
+
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "dynamodb:*"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "*"
+            ]
+        }
+    ]
+}
+```
+
+It is possible to set finer grain rights. Please refer to:
+https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_examples_dynamodb_specific-table.html
+
+Write down the AWS id and AWS key. They will be needed as environmental variables (`AWS_ID`, `AWS_KEY`) when deploying the server. Avoid adding them to the code.
+
