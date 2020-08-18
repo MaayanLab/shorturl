@@ -78,12 +78,13 @@ The server expects the following environmental variables:
 
 ## Deploy docker container
 
-Run prebuilt docker container on localhost. Modify variables as needed.
+Run prebuilt docker container from `Docker Hub` called **maayanlab/shorturl** on localhost. Modify variables as needed.
 
 ```
 sudo docker run \ 
     -e AWS_ID='XXXXXX' \
     -e AWS_KEY='YYYYYY' \
+    -e AWS_REGION='us-east-1' \
     -e DOMAIN='http://localhost:5000' \
     -e ENDPOINT='turl' \
     -e API_KEY='secretkey' \
