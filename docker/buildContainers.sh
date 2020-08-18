@@ -10,8 +10,9 @@ docker push maayanlab/shorturl
 sudo docker run \ 
     -e AWS_ID='XXXXXX' \
     -e AWS_KEY='YYYYYY' \
-    -e DOMAIN='https://maayanlab.cloud' \
+    -e AWS_REGION='us-east-1' \
+    -e DOMAIN='http://localhost:5000' \
     -e ENDPOINT='turl' \
     -e API_KEY='secretkey' \
-    -p 3000:3000 \
+    -p 5000:5000 \
     -d --name="turl" maayanlab/shorturl 
