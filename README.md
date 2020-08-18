@@ -27,8 +27,8 @@ payload = {
 
 response = requests.post('https://maayanlab.cloud/turl/api/register', json=payload)
 print("Status code: ", response.status_code)
-print("Printing Entire Post Request")
-print(response.json())
+print("Printing shortened URL")
+print(response.json()['shorturl'])
 ```
 
 ## Configuring AWS
