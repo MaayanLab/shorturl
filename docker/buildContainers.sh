@@ -2,12 +2,15 @@
 docker rmi -f $(docker images | grep "^<none>" | awk "{print $3}")
 docker rm $(docker ps -q -f status=exited)
 
-#docker build -f DockerStar -t maayanlab/aligner-amazon .
+# build container
 docker build -f DockerURL -t maayanlab/shorturl .
-
 docker push maayanlab/shorturl
 
-# docker run -d -v /Users/maayanlab/data:/alignment/data/ --name="aligner" maayanlab/alignerutils-amazon
-
-#sudo docker run -d --name="kallisto" maayanlab/cloudkallisto
-
+# launch locally
+sudo docker run -p 3000:3000 -d --name="turl" maayanlab/shorturl \ 
+    -e AWS_ID='XXXXXX' \
+    -e AWS_KEY='YYYYYY' \
+    -e DOMAIN='https://maayanlab.cloud' \
+    -e ENDPOINT='turl' \
+    -e API_KEY='secretkey' \
+    -p 3000:3000 \

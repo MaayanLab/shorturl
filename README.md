@@ -63,3 +63,20 @@ https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_examples_dyn
 
 Write down the AWS id and AWS key. They will be needed as environmental variables (`AWS_ID`, `AWS_KEY`) when deploying the server. Avoid adding them to the code.
 
+## Deploying the webserver
+
+The webserver is available as a Docker container at maayanlab/shorturl. Depending where is will be accessible adjust the `DOMAIN` and `ENDPOINT` accortingly. In this example the webserver is exposed at `https://maayanlab.cloud/turl`. 
+
+The server expects the following environmental variables:
+`AWS_ID` = AWS user id
+`AWS_KEY` = AWS user key
+`DOMAIN` = "http://maayanlab.cloud"
+`ENDPOINT` = "turl"
+`API_KEY` = "apipassword"
+`DYNAMODB_TABLE` = "shorturl"
+
+## Deploy docker container
+
+```
+
+```
