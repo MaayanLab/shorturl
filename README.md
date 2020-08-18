@@ -68,15 +68,23 @@ Write down the AWS id and AWS key. They will be needed as environmental variable
 The webserver is available as a Docker container at maayanlab/shorturl. Depending where is will be accessible adjust the `DOMAIN` and `ENDPOINT` accortingly. In this example the webserver is exposed at `https://maayanlab.cloud/turl`. 
 
 The server expects the following environmental variables:
-`AWS_ID` = AWS user id
-`AWS_KEY` = AWS user key
-`DOMAIN` = "http://maayanlab.cloud"
-`ENDPOINT` = "turl"
-`API_KEY` = "apipassword"
-`DYNAMODB_TABLE` = "shorturl"
+`AWS_ID` = AWS user id <br>
+`AWS_KEY` = AWS user key <br>
+`DOMAIN` = "https://maayanlab.cloud" <br>
+`ENDPOINT` = "turl" <br>
+`API_KEY` = "apipassword" <br>
+`DYNAMODB_TABLE` = "shorturl" <br>
 
 ## Deploy docker container
 
-```
+Run prebuilt docker container on local host. Modify variables as needed.
 
+```
+sudo docker run -p 3000:3000 -d --name="turl" maayanlab/shorturl \ 
+    -e AWS_ID='XXXXXX' \
+    -e AWS_KEY='YYYYYY' \
+    -e DOMAIN='https://maayanlab.cloud' \
+    -e ENDPOINT='turl' \
+    -e API_KEY='secretkey' \
+    -p 3000:3000 \
 ```
